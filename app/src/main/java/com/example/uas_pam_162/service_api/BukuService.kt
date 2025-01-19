@@ -18,23 +18,22 @@ interface BukuService {
     )
 
 
-    @GET(".")
+    @GET("buku")
     suspend fun getAllBuku(): AllBukuResponse
 
-    @GET("{idBuku}")
+    @GET("buku/{idBuku}")
     suspend fun getBukubyId(@Path("idBuku")idBuku: String):BukuDetailRespone
 
-    //    @POST("insertmahasiswa.php")
-    @POST("store")
+
+    @POST("buku")
     suspend fun insertBuku(@Body buku: Buku)
 
 
-    //    @PUT("editmahasiswa.php/{nim}")
-    @PUT("{idBuku}")
+    @PUT("buku/{idBuku}")
     suspend fun updateBuku(@Path("idBuku") idBuku: String, @Body buku: Buku)
 
 
-    @DELETE("deletebuku.php/{idBuku}")
+    @DELETE("buku/{idBuku}")
     suspend fun deleteBuku(@Path("idBuku") idBuku: String): retrofit2.Response<Void>
 
 }
