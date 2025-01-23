@@ -25,8 +25,9 @@ interface BukuService {
     suspend fun getBukubyId(@Path("idBuku")idBuku: String):BukuDetailRespone
 
 
-    @POST("buku")
+    @POST("buku/store")
     suspend fun insertBuku(@Body buku: Buku)
+
 
 
     @PUT("buku/{idBuku}")
