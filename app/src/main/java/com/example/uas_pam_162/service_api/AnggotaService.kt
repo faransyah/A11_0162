@@ -27,7 +27,7 @@ interface AnggotaService {
     suspend fun getAnggotabyId(@Path("idAnggota") idAnggota: String): AnggotaDetailRespone
 
     // Menambahkan anggota baru
-    @POST("anggota")
+    @POST("anggota/store")
     suspend fun insertAnggota(@Body anggota: Anggota)
 
     // Memperbarui anggota berdasarkan ID
