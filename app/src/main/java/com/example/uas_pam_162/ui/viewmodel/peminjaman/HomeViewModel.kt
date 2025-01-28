@@ -17,12 +17,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okio.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+
 
 sealed class HomePeminjamanUiState {
     data class Success(
         val peminjaman: List<Peminjaman>,
-        val buku: List<Buku>, // Ganti Map<Int, String> dengan List<Buku>
-        val anggota: List<Anggota> // Ganti Map<Int, String> dengan List<Anggota>
+        val peminjamanAktif: List<Peminjaman>, // Tambahkan ini untuk peminjaman aktif
+        val buku: List<Buku>,
+        val anggota: List<Anggota>
     ) : HomePeminjamanUiState()
     object Error : HomePeminjamanUiState()
     object Loading : HomePeminjamanUiState()
@@ -72,9 +78,17 @@ class HomePeminjamanViewModel(
                 _anggotaList = anggotaPjm.data
                 Log.d("ViewModel", "Loaded Anggota: ${_anggotaList.size} items")
 
-                // Update state dengan data peminjaman, buku, dan anggota
+                // Filter peminjaman aktif
+                val peminjamanAktif = getPeminjamanAktif(peminjaman)
+
+                // Update state dengan data peminjaman, peminjaman aktif, buku, dan anggota
                 Log.d("HomePeminjamanViewModel", "Memperbarui UI state dengan data yang diambil...")
-                _pjmUIState.value = HomePeminjamanUiState.Success(peminjaman, _bukuList, _anggotaList)
+                _pjmUIState.value = HomePeminjamanUiState.Success(
+                    peminjaman = peminjaman,
+                    peminjamanAktif = peminjamanAktif, // Sertakan peminjaman aktif
+                    buku = _bukuList,
+                    anggota = _anggotaList
+                )
                 Log.d("HomePeminjamanViewModel", "UI state berhasil diperbarui.")
             } catch (e: IOException) {
                 Log.e("HomePeminjamanViewModel", "IO Error: ${e.message}", e)
@@ -99,6 +113,25 @@ class HomePeminjamanViewModel(
                 _pjmUIState.value = HomePeminjamanUiState.Error  // Update UI state on error
             } catch (e: Exception) {
                 _pjmUIState.value = HomePeminjamanUiState.Error  // Handle unexpected errors
+            }
+        }
+    }
+
+    // Fungsi untuk memfilter peminjaman aktif
+    private fun getPeminjamanAktif(peminjamanList: List<Peminjaman>): List<Peminjaman> {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val currentDate = dateFormat.format(Date()) // Tanggal sekarang
+
+        return peminjamanList.filter { peminjaman ->
+            val tanggalPeminjaman = peminjaman.tanggal_peminjaman
+            val tanggalPengembalian = peminjaman.tanggal_pengembalian
+
+            // Pastikan tanggal tidak null dan dalam format yang benar
+            if (tanggalPeminjaman != null && tanggalPengembalian != null) {
+                // Bandingkan tanggal sekarang dengan rentang peminjaman
+                currentDate >= tanggalPeminjaman && currentDate <= tanggalPengembalian
+            } else {
+                false // Jika tanggal null, anggap tidak aktif
             }
         }
     }
