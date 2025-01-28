@@ -46,8 +46,15 @@ class InsertAnggotaViewModel(private val agt: AnggotaRepository): ViewModel(){
         }
     }
 
-
+    // Fungsi validasi form
+    fun isFormValid(): Boolean {
+        return uiStateAgt.insertUiEventAgt.nama.isNotEmpty() &&
+                uiStateAgt.insertUiEventAgt.email.isNotEmpty() &&
+                uiStateAgt.insertUiEventAgt.nomor_telepon.isNotEmpty()
+    }
 }
+
+
 
 data class InsertUiStateAgt(
     val insertUiEventAgt: InsertUiEventAgt = InsertUiEventAgt()

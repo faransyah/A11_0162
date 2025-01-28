@@ -1,5 +1,6 @@
 package com.example.uas_pam_162.ui.view.anggota
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,6 +47,11 @@ fun EntryAnggotatScreen(
     val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
+    // Mengambil state UI
+    val uiState = viewModel.uiStateAgt
+    val isFormValid = viewModel.isFormValid() // Validasi form dari ViewModel
+
+
     Scaffold( modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
 
         topBar = {
@@ -63,10 +69,15 @@ fun EntryAnggotatScreen(
             onAnggotaValueChange = viewModel::UpdateInsertAgtState,
             onSaveClickAgt = {
                 coroutineScope.launch {
-                    viewModel.insertAgt()
-                    navigateBackAgt()
+                    if (isFormValid) {
+                        viewModel.insertAgt()
+                        navigateBackAgt()
+                    } else {
+                        Log.e("EntryAnggotatScreen", "Form tidak lengkap!")
+                    }
                 }
             },
+            isFormValid = isFormValid,
             modifier = Modifier
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
@@ -84,7 +95,8 @@ fun EntryBodyAnggota(
     insertUiStateAgt: InsertUiStateAgt,
     onAnggotaValueChange: (InsertUiEventAgt) -> Unit,
     onSaveClickAgt: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isFormValid: Boolean = true
 ){
     Column(
         verticalArrangement = Arrangement.spacedBy(18.dp),
@@ -98,7 +110,8 @@ fun EntryBodyAnggota(
         Button(
             onClick = onSaveClickAgt,
             shape = MaterialTheme.shapes.small,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = isFormValid
         ) {
             Text(text = "Simpan")
         }
