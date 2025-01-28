@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -27,8 +28,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -53,13 +59,17 @@ object DestinasiHomeBuku: DestinasiNavigasi{
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenBuku(
-    navigateToItemEntry: ()-> Unit,
+    navigateToItemEntry: () -> Unit,
     modifier: Modifier = Modifier,
     navigateBack: () -> Unit,
     onDetailClick: (String) -> Unit = {},
     viewModel: HomeBukuViewModel = viewModel(factory = PenyediaViewModel.Factory)
-){
+) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
+    // State untuk menampung teks pencarian
+    var searchQuery by remember { mutableStateOf("") }
+
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -69,9 +79,9 @@ fun HomeScreenBuku(
                 scrollBehavior = scrollBehavior,
                 navigateUp = navigateBack,
                 onRefresh = {
-                    viewModel.getBk()
+                    // Kirimkan searchQuery saat refresh
+                    viewModel.getBk(searchQuery)  // Refresh buku dengan query yang ada
                 }
-
             )
         },
         floatingActionButton = {
@@ -80,22 +90,46 @@ fun HomeScreenBuku(
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.padding(18.dp)
             ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Kontak")
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Buku")
             }
         }
     ) { innerPadding ->
-        HomeBukuStatus(
-            homeBukuUiState = viewModel.bkUIState,
-            retryAction = {viewModel.getBk()}, modifier = Modifier.padding(innerPadding),
-            onDetailClick = onDetailClick,
-            onDeleteClick = {
-                viewModel.deleteBk(it.id_buku.toString())
-                viewModel.getBk()
-            }
+        // Layout utama Home Screen
+        Column(modifier = Modifier.padding(innerPadding)) {
 
-        )
+            // TextField untuk pencarian
+            TextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                label = { Text("Search Buku") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp), // Pastikan ada ruang
+                trailingIcon = {
+                    IconButton(onClick = {
+                        viewModel.getBk(searchQuery) // Fungsi untuk filter buku berdasarkan pencarian
+                    }) {
+                        Icon(imageVector = Icons.Default.Search, contentDescription = "Search Buku")
+                    }
+                }
+            )
+
+            // Menampilkan daftar buku berdasarkan hasil pencarian
+            HomeBukuStatus(
+                homeBukuUiState = viewModel.bkUIState,
+                retryAction = { viewModel.getBk(searchQuery) },
+                modifier = Modifier.padding(innerPadding),
+                onDetailClick = onDetailClick,
+                onDeleteClick = {
+                    viewModel.deleteBk(it.id_buku.toString())
+                    viewModel.getBk(searchQuery)  // Refresh setelah hapus
+                }
+            )
+        }
     }
 }
+
+
 @Composable
 fun HomeBukuStatus(
     homeBukuUiState: HomeBukuUiState,

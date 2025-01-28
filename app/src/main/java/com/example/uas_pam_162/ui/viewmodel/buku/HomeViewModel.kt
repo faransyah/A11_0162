@@ -17,39 +17,52 @@ sealed class HomeBukuUiState{
     object Loading: HomeBukuUiState()
 }
 
-class HomeBukuViewModel (private val bk: BukuRepository): ViewModel(){
+class HomeBukuViewModel(private val bk: BukuRepository): ViewModel() {
     var bkUIState: HomeBukuUiState by mutableStateOf(HomeBukuUiState.Loading)
         private set
 
     init {
-        getBk()
+        getBk("") // Ambil semua buku saat pertama kali
     }
 
-    fun getBk(){
+    fun getBk(searchQuery: String) {
         viewModelScope.launch {
             bkUIState = HomeBukuUiState.Loading
             bkUIState = try {
-                HomeBukuUiState.Success(bk.getBuku().data)
-            }catch (e: IOException){
+                val bukuList = bk.getBuku().data
+                if (searchQuery.isNotEmpty()) {
+                    // Filter buku berdasarkan search query
+                    HomeBukuUiState.Success(bukuList.filter { buku ->
+                        buku.judul.contains(searchQuery, ignoreCase = true) ||
+                                buku.penulis.contains(searchQuery, ignoreCase = true)
+                    })
+                } else {
+                    // Tampilkan semua buku jika query kosong
+                    HomeBukuUiState.Success(bukuList)
+                }
+            } catch (e: IOException) {
                 HomeBukuUiState.Error
-            }catch (e: HttpException){
+            } catch (e: HttpException) {
                 HomeBukuUiState.Error
             }
         }
     }
 
-    fun deleteBk(idBuku: String){
+    fun deleteBk(idBuku: String) {
         viewModelScope.launch {
             try {
                 bk.deleteBuku(idBuku)
-            }catch (e: IOException){
+            } catch (e: IOException) {
                 HomeBukuUiState.Error
-            }catch (e:HttpException){
+            } catch (e: HttpException) {
                 HomeBukuUiState.Error
             }
         }
     }
 }
+
+
+
 
 
 
