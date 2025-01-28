@@ -6,7 +6,10 @@ import kotlinx.serialization.Serializable
 data class Pengembalian(
     val id_pengembalian: Int,
     val id_peminjaman: Int,
-    val tanggal_dikembalikan: String
+    val tanggal_dikembalikan: String,
+    val id_buku: Int? = null, // Field nullable
+    val id_anggota: Int? = null // Field nullable
+
 )
 
 @Serializable

@@ -2,6 +2,7 @@ package com.example.uas_pam_162.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -38,6 +39,8 @@ import com.example.uas_pam_162.ui.view.pengembalian.DestinasiDetailPengembalian
 import com.example.uas_pam_162.ui.view.pengembalian.DestinasiHomePengembalian
 import com.example.uas_pam_162.ui.view.pengembalian.DetailPengembalianView
 import com.example.uas_pam_162.ui.view.pengembalian.HomeScreenPengembalian
+import com.example.uas_pam_162.ui.viewmodel.PenyediaViewModel
+import com.example.uas_pam_162.ui.viewmodel.buku.HomeBukuViewModel
 
 @Composable
 fun PengelolaHalaman(
@@ -68,27 +71,30 @@ fun PengelolaHalaman(
                 }
             )
         }
-        composable(DestinasiHomeBuku.route){
+        composable(DestinasiHomeBuku.route) {
+            // Menggunakan viewModel() dengan memberikan tipe ViewModel secara eksplisit
+            val viewModel: HomeBukuViewModel = viewModel(factory = PenyediaViewModel.Factory)
+
+            // Pastikan Anda mendapatkan bukuList dari ViewModel
             HomeScreenBuku(
-                navigateToItemEntry = {navController.navigate(DestinasiBukuEntry.route)},
+                navigateToItemEntry = { navController.navigate(DestinasiBukuEntry.route) },
                 navigateBack = {
-                    navController.navigate(DestinasiHomeAwal.route){
-                        popUpTo(DestinasiHomeAwal.route){
+                    navController.navigate(DestinasiHomeAwal.route) {
+                        popUpTo(DestinasiHomeAwal.route) {
                             inclusive = true
                         }
                     }
                 },
-                onDetailClick = {id ->
-                    navController.navigate("${DestinasiDetailBuku.route}/$id"){
-                        popUpTo(DestinasiHomeBuku.route){
+                onDetailClick = { id ->
+                    navController.navigate("${DestinasiDetailBuku.route}/$id") {
+                        popUpTo(DestinasiHomeBuku.route) {
                             inclusive = true
                         }
                     }
-
-                }
-
+                },
             )
         }
+
         composable(DestinasiBukuEntry.route){
             EntryBukuScreen(
                 navigateBack = {
@@ -305,6 +311,8 @@ fun PengelolaHalaman(
                 )
             }
         }
+
+
 
 
     }

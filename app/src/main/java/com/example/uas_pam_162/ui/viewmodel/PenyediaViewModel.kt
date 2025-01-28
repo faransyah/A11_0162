@@ -20,6 +20,7 @@ import com.example.uas_pam_162.ui.viewmodel.peminjaman.InsertViewModelPeminjaman
 import com.example.uas_pam_162.ui.viewmodel.peminjaman.UpdatePeminjamanViewModel
 import com.example.uas_pam_162.ui.viewmodel.pengembalian.DetailPengembalianViewModel
 import com.example.uas_pam_162.ui.viewmodel.pengembalian.HomePengembalianViewModel
+import com.example.uas_pam_162.ui.viewmodel.pengembalian.InsertViewModelPengembalian
 
 
 object PenyediaViewModel {
@@ -82,8 +83,13 @@ object PenyediaViewModel {
                 peminjamanRepository = aplikasiKontak().container.peminjamanRepository
             )
         }
+        initializer { InsertViewModelPengembalian(
+            aplikasiKontak().container.pengembalianRepository,
+            aplikasiKontak().container.peminjamanRepository,
+            aplikasiKontak().container.bukuRepository,
+            aplikasiKontak().container.anggotaRepository,
 
-
+            ) }
 
 
     }
