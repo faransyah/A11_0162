@@ -18,6 +18,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -44,7 +46,7 @@ import com.example.uas_pam_162.ui.viewmodel.buku.HomeBukuViewModel
 
 
 object DestinasiHomeBuku: DestinasiNavigasi{
-    override val route = "home"
+    override val route = "home buku"
     override val titleRes = "Home Buku"
 }
 
@@ -53,6 +55,7 @@ object DestinasiHomeBuku: DestinasiNavigasi{
 fun HomeScreenBuku(
     navigateToItemEntry: ()-> Unit,
     modifier: Modifier = Modifier,
+    navigateBack: () -> Unit,
     onDetailClick: (String) -> Unit = {},
     viewModel: HomeBukuViewModel = viewModel(factory = PenyediaViewModel.Factory)
 ){
@@ -62,8 +65,9 @@ fun HomeScreenBuku(
         topBar = {
             CostumeTopAppBar(
                 title = DestinasiHomeBuku.titleRes,
-                canNavigateBack = false,
+                canNavigateBack = true,
                 scrollBehavior = scrollBehavior,
+                navigateUp = navigateBack,
                 onRefresh = {
                     viewModel.getBk()
                 }
@@ -160,27 +164,85 @@ fun BukuLayout(
     modifier: Modifier = Modifier,
     onDetailClick: (Buku) -> Unit,
     onDeleteClick: (Buku) -> Unit = {}
-){
+) {
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-        items(buku){ kontak ->
-            BukuCard(
-                buku = kontak,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        item {
+            // Table Header
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "ID Buku",
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = "Judul",
+                    modifier = Modifier.weight(3f),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = "Penulis",
+                    modifier = Modifier.weight(2f),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = "Kategori",
+                    modifier = Modifier.weight(2f),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = "Status",
+                    modifier = Modifier.weight(2f),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        }
+        items(buku) { bukuItem ->
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onDetailClick(kontak) },
-                onDeleteClick = {
-                    onDeleteClick(kontak)
+                    .clickable { onDetailClick(bukuItem) }
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(
+                    text = bukuItem.id_buku.toString(),
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = bukuItem.judul,
+                    modifier = Modifier.weight(3f),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = bukuItem.penulis,
+                    modifier = Modifier.weight(2f),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = bukuItem.kategori,
+                    modifier = Modifier.weight(2f),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = bukuItem.status,
+                    modifier = Modifier.weight(2f),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                IconButton(onClick = { onDeleteClick(bukuItem) }) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete"
+                    )
                 }
-            )
-
+            }
         }
-
     }
 }
+
 
 
 @Composable
@@ -189,37 +251,44 @@ fun BukuCard(
     modifier: Modifier = Modifier,
     onDeleteClick: (Buku) -> Unit = {}
 ){
-    Column(
-        modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+    Card(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = buku.judul,
-                style = MaterialTheme.typography.titleLarge,
-            )
-            Spacer(Modifier.weight(1f))
-            IconButton(onClick = {onDeleteClick(buku)}) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = null,
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = buku.judul,
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Spacer(Modifier.weight(1f))
+                IconButton(onClick = {onDeleteClick(buku)}) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                    )
+                }
+                Text(
+                    text = buku.id_buku.toString(),
+                    style = MaterialTheme.typography.titleMedium
                 )
             }
             Text(
-                text = buku.id_buku.toString(),
+                text = buku.penulis,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = buku.kategori,
                 style = MaterialTheme.typography.titleMedium
             )
         }
-        Text(
-            text = buku.penulis,
-            style = MaterialTheme.typography.titleMedium
-        )
-        Text(
-            text = buku.kategori,
-            style = MaterialTheme.typography.titleMedium
-        )
     }
+
 }
