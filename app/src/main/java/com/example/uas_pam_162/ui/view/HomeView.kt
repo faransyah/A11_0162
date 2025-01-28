@@ -1,5 +1,6 @@
 package com.example.uas_pam_162.ui.view
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -94,10 +97,10 @@ fun HomeMulai(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.logo), // Ganti dengan ikon Buku
+                        Image(
+                            painter = painterResource(id = R.drawable.buku), // Ganti dengan ikon Buku
                             contentDescription = "Icon Buku",
-                            tint = Color.White,
+
                             modifier = Modifier
                                 .size(48.dp)
                                 .padding(end = 16.dp)
@@ -124,13 +127,14 @@ fun HomeMulai(
                             .padding(16.dp)
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.logo), // Ganti dengan ikon Anggota
+                            imageVector = Icons.Default.Person, // Menggunakan ikon person
                             contentDescription = "Icon Anggota",
                             tint = Color.White,
                             modifier = Modifier
                                 .size(48.dp)
                                 .padding(end = 16.dp)
                         )
+
                         Text(
                             text = "Data Anggota",
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
