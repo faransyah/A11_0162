@@ -26,7 +26,7 @@ interface PeminjamanService {
     suspend fun getPeminjamanbyId(@Path("idPeminjaman")idPeminjaman: String): PeminjamanDetailRespone
 
 
-    @POST("peminjaman")
+    @POST("peminjaman/store")
     suspend fun insertPeminjaman(@Body peminjaman: Peminjaman)
 
 

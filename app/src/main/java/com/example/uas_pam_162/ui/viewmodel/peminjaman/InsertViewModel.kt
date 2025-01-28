@@ -94,9 +94,6 @@ class InsertViewModelPeminjaman(
             }
         }
     }
-
-
-
 }
 
 // Data class untuk state UI
