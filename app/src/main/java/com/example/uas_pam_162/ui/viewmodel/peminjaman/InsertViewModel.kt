@@ -12,8 +12,6 @@ import com.example.uas_pam_162.model.Peminjaman
 import com.example.uas_pam_162.repository.AnggotaRepository
 import com.example.uas_pam_162.repository.BukuRepository
 import com.example.uas_pam_162.repository.PeminjamanRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 
@@ -23,9 +21,10 @@ class InsertViewModelPeminjaman(
     private val repositoryAgt: AnggotaRepository
 ) : ViewModel() {
 
-    var _bukuList = mutableStateOf<List<Buku>>(emptyList())
-        private set
-    var _anggotaList = mutableStateOf<List<Anggota>>(emptyList())
+   var _bukuList by mutableStateOf<List<Buku>>(listOf())
+       private set
+
+    var _anggotaList by mutableStateOf<List<Anggota>>(listOf())
         private set
 
     var uiStatePjm by mutableStateOf(InsertUiStatePjm())
@@ -38,48 +37,73 @@ class InsertViewModelPeminjaman(
     private fun loadData() {
         viewModelScope.launch {
             try {
+                Log.d("ViewModel", "Loading data for Buku...")
                 val bukuPjm = repositoryBk.getBuku()
-                bukuPjm?.data?.let { data ->
-                    _bukuList.value = data
-                }
+                _bukuList = bukuPjm.data
+                Log.d("ViewModel", "Loaded Buku: ${_bukuList.size} items")
 
+                Log.d("ViewModel", "Loading data for Anggota...")
                 val anggotaPjm = repositoryAgt.getAnggota()
-                anggotaPjm?.data?.let { data ->
-                    _anggotaList.value = data
-                }
+                _anggotaList = anggotaPjm.data
+                Log.d("ViewModel", "Loaded Anggota: ${_anggotaList.size} items")
+
             } catch (e: Exception) {
                 Log.e("ViewModel", "Error loading data: ${e.message}", e)
             }
         }
     }
+    fun updateInsertState(insertUiEventPeminjam: InsertUiEventPeminjam){
+        uiStatePjm = uiStatePjm.copy(insertUiEventPeminjam = insertUiEventPeminjam)
+    }
+    fun validateAndInsertPjm(): Boolean {
+        val errorMessage = when {
+            uiStatePjm.insertUiEventPeminjam.id_buku == 0 -> "Buku harus dipilih"
+            uiStatePjm.insertUiEventPeminjam.id_anggota == 0 -> "Anggota harus dipilih"
+            uiStatePjm.insertUiEventPeminjam.tanggal_peminjaman.isEmpty() -> "Tanggal peminjaman harus diisi"
+            uiStatePjm.insertUiEventPeminjam.tanggal_pengembalian.isEmpty() -> "Tanggal pengembalian harus diisi"
+            else -> null
+        }
+        if (errorMessage != null) {
+            Log.e("InsertViewModelPeminjaman", "Validation failed: $errorMessage")
+            return false
+        }
+        insertPjm()  // Call insert if validation passes
+        return true
+    }
 
-    fun insertPjm() {
+
+        fun insertPjm() {
         viewModelScope.launch {
             try {
-                val peminjaman = uiStatePjm.insertUiEventPeminjam.toPjm()
-                pjm.insertPeminjaman(peminjaman)
+                Log.d("ViewModel", "Sedang memasukkan data Peminjaman: $uiStatePjm")
+                pjm.insertPeminjaman(uiStatePjm.insertUiEventPeminjam.toPjm())
+                Log.d("ViewModel", "Peminjaman berhasil dimasukkan")
+
             } catch (e: Exception) {
-                Log.e("ViewModel", "Error inserting peminjaman: ${e.message}", e)
+                when (e) {
+                    is retrofit2.HttpException -> {
+                        val response = e.response()
+                        val errorBody = response?.errorBody()?.string()
+                        Log.e("ViewModel", "Kesalahan HTTP: ${e.code()} - ${e.message}")
+                        Log.e("ViewModel", "Isi respons kesalahan: $errorBody")
+                    }
+                    else -> {
+                        Log.e("ViewModel", "Terjadi kesalahan saat memasukkan peminjaman: ${e.message}", e)
+                    }
+                }
             }
         }
     }
 
-    fun updateSelectedBuku(idBuku: Int) {
-        uiStatePjm = uiStatePjm.copy(
-            insertUiEventPeminjam = uiStatePjm.insertUiEventPeminjam.copy(id_buku = idBuku)
-        )
-    }
 
-    fun updateSelectedAnggota(idAnggota: Int) {
-        uiStatePjm = uiStatePjm.copy(
-            insertUiEventPeminjam = uiStatePjm.insertUiEventPeminjam.copy(id_anggota = idAnggota)
-        )
-    }
+
 }
 
 // Data class untuk state UI
 data class InsertUiStatePjm(
-    val insertUiEventPeminjam: InsertUiEventPeminjam = InsertUiEventPeminjam()
+    val insertUiEventPeminjam: InsertUiEventPeminjam = InsertUiEventPeminjam(),
+    val judulBukuList: List<Buku> = emptyList(),
+    val namaAnggotaList: List<Anggota> = emptyList()
 )
 
 // Data class untuk event UI
@@ -99,3 +123,4 @@ fun InsertUiEventPeminjam.toPjm(): Peminjaman = Peminjaman(
     id_buku = id_buku,
     id_anggota = id_anggota
 )
+

@@ -16,6 +16,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -68,8 +69,9 @@ fun EntryPjmScreen(
             onPjmValueChange = viewModel::updateInsertState,
             onSaveClick = {
                 coroutineScope.launch {
-                    viewModel.insertPjm()
-                    navigateBack()
+                    if (viewModel.validateAndInsertPjm()) {
+                        navigateBack()
+                    }
                 }
             },
             anggotaList = anggotaList,
@@ -214,6 +216,19 @@ fun FormInputPeminjaman(
                     "Pilih Tanggal Pengembalian"
                 }
             )
+        }
+        // Validasi pesan error
+        if (insertUiEventPeminjam.id_buku == 0) {
+            Text("Buku harus dipilih", color = Color.Red)
+        }
+        if (insertUiEventPeminjam.id_anggota == 0) {
+            Text("Anggota harus dipilih", color = Color.Red)
+        }
+        if (insertUiEventPeminjam.tanggal_peminjaman.isEmpty()) {
+            Text("Tanggal peminjaman harus diisi", color = Color.Red)
+        }
+        if (insertUiEventPeminjam.tanggal_pengembalian.isEmpty()) {
+            Text("Tanggal pengembalian harus diisi", color = Color.Red)
         }
     }
 }
